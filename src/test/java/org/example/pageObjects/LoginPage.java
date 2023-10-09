@@ -1,44 +1,54 @@
 package org.example.pageObjects;
 
-import org.openqa.selenium.By;
+import org.example.reusablemethods.ReusableCommonMethods;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 
 public class LoginPage {
 
     public WebDriver driver;
 
-    By userName = By.name("username");
-    By passWord = By.name("password");
-    By login = By.xpath("//button[@type='submit']");
-    By errorMessage = By.xpath("//div[@class='orangehrm-login-error']");
-    By forgotPasswordLink = By.xpath("//div[@class='orangehrm-login-error']/div/div//p");
-    By loginPageTitle = By.xpath("//*[@id='app']/div[1]/div/div[1]/div/div[2]/h5");
+    @FindBy(name = "username")
+    WebElement userName;
+    @FindBy(name = "password")
+    WebElement passWord;
+    @FindBy(xpath = "//button[@type='submit']")
+    WebElement login;
+    @FindBy(xpath = "(//div[@class='orangehrm-login-error']//p)[1]")
+    WebElement errorMessage;
+    @FindBy(xpath = "//div[@class='orangehrm-login-forgot']//p")
+    WebElement forgotPasswordLink;
+    @FindBy(xpath = "//*[@id='app']/div[1]/div/div[1]/div/div[2]/h5")
+    WebElement loginPageTitle;
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
-    }
+        PageFactory.initElements(driver, this);
 
+    }
     public String getErrorMessage() {
-        return driver.findElement(errorMessage).getText();
+        ReusableCommonMethods.waitForElementToBeVisible(errorMessage,driver,20);
+        return errorMessage.getText();
     }
 
-    public void login(String strUserName, String strPassword) throws InterruptedException {
+    public void login(String strUserName, String strPassword) {
         // Fill user name
-        driver.findElement(userName).sendKeys(strUserName);
-
+        ReusableCommonMethods.enterValueInTextBox(userName,strUserName,driver);
         // Fill password
-        driver.findElement(passWord).sendKeys(strPassword);
-
+        ReusableCommonMethods.enterValueInTextBox(passWord,strPassword,driver);
         // Click Login button
-        driver.findElement(login).click();
+        ReusableCommonMethods.clickOnWebElement(driver,login);
 
     }
     // Click on Forgot Password link
     public void clickOnForgotPasswordLink() {
-        driver.findElement(forgotPasswordLink).click();
+        ReusableCommonMethods.clickOnWebElement(driver,forgotPasswordLink);
     }
     //Get Login Page Title
     public String getLoginPageTitle() {
-        return driver.findElement(loginPageTitle).getText();
+        ReusableCommonMethods.waitForElementToBeVisible(loginPageTitle,driver,20);
+        return loginPageTitle.getText();
     }
 }

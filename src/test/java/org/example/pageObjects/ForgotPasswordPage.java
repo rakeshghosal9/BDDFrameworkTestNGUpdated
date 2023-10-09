@@ -1,44 +1,54 @@
 package org.example.pageObjects;
 
-import org.openqa.selenium.By;
+import org.example.reusablemethods.ReusableCommonMethods;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 
 public class ForgotPasswordPage {
 
     WebDriver driver;
-
-    By forgotPasswordPageTitle = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/h6");
-    By cancelBtn = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/div[2]/button[1]");
-    By resetPasswordBtn = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/div[2]/button[2]");
-    By userName = By.name("username");
-    By resetMessage = By.xpath("//*[@id='app']/div[1]/div[1]/div/h6");
+    @FindBy(xpath = "//*[@id='app']//h6[contains(@class,'orangehrm-forgot-password-title')]")
+    WebElement forgotPasswordPageTitle;
+    @FindBy(xpath = "//div[@class='orangehrm-forgot-password-button-container']//button[@type='button']")
+    WebElement cancelBtn;
+    @FindBy(xpath = "//div[@class='orangehrm-forgot-password-button-container']//button[@type='submit']")
+    WebElement resetPasswordBtn;
+    @FindBy(name = "username")
+    WebElement userName;
+    @FindBy(xpath = "//*[@id='app']//h6[contains(@class,'orangehrm-forgot-password-title')]")
+    WebElement resetMessage;
 
     public ForgotPasswordPage(WebDriver driver) {
         this.driver = driver;
+        PageFactory.initElements(driver, this);
     }
 
     // Get the Title of ForgotPage
     public String getForgotPageText() {
-        return driver.findElement(forgotPasswordPageTitle).getText();
+        ReusableCommonMethods.waitForElementToBeVisible(forgotPasswordPageTitle,driver,20);
+        return forgotPasswordPageTitle.getText();
     }
 
     // Click Cancel Button
     public void clickOnCancelBtn() {
-        driver.findElement(cancelBtn).click();
+        ReusableCommonMethods.clickOnWebElement(driver,cancelBtn);
     }
 
     // Click ResetPassword Button
     public void clickOnRestPasswordBtn() {
-        driver.findElement(resetPasswordBtn).click();
+        ReusableCommonMethods.clickOnWebElement(driver,resetPasswordBtn);
     }
 
     // Type username in TextBox
     public void TypeOnUsernameTextBox(String username) {
-        driver.findElement(userName).sendKeys(username);
+        ReusableCommonMethods.enterValueInTextBox(userName,username,driver);
     }
 
     // Get Message
     public String getRestMessage() {
-        return driver.findElement(resetMessage).getText();
+        ReusableCommonMethods.waitForElementToBeVisible(forgotPasswordPageTitle,driver,20);
+        return resetMessage.getText();
     }
 }

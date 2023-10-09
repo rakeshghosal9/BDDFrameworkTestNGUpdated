@@ -19,42 +19,32 @@ public class LoginPageDefinitions {
 
     public LoginPageDefinitions(TestSetUp setUp) throws IOException {
         this.setUp = setUp;
-       // baseTest = baseTest.WebDriverManager();
         this.loginPage = setUp.pageObjectManager.getLoginPage();
         this.homePage= setUp.pageObjectManager.getHomePage();
     }
 
-    @Given("User is on Home page")
+   /* @Given("User is on Home page")
     public void loginTest() throws IOException {
-        setUp.baseTest.WebDriverManager().get("https://opensource-demo.orangehrmlive.com/");
-    }
+        //setUp.baseTest.WebDriverManager().get("https://opensource-demo.orangehrmlive.com/");
+
+    }*/
 
     @When("User enters username as {string} and password as {string}")
     public void goToHomePage(String userName, String passWord) throws InterruptedException {
 
-      //  LoginPage loginPage = setUp.pageObjectManager.getLoginPage();
-
-
         // login to application
         loginPage.login(userName, passWord);
-
-        // go the next page
 
     }
 
     @Then("User should be able to login successfully")
     public void verifyLogin() {
-
-      //  HomePage homePage= setUp.pageObjectManager.getHomePage();
         // Verify home page
         Assert.assertTrue(homePage.getHomePageText().contains("Dashboard"));
-
     }
 
     @Then("User should be able to see error message {string}")
     public void verifyErrorMessage(String expectedErrorMessage) {
-
-    //    LoginPage loginPage = setUp.pageObjectManager.getLoginPage();
 
         // Verify home page
         Assert.assertEquals(loginPage.getErrorMessage(),expectedErrorMessage);

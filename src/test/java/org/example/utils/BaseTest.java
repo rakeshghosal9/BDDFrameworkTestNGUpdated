@@ -28,10 +28,10 @@ public class BaseTest {
                 //WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver();
             } else if (prop.getProperty("browser").equalsIgnoreCase("firefox")) {
-                WebDriverManager.firefoxdriver().setup();
+                //WebDriverManager.firefoxdriver().setup();
                 driver = new FirefoxDriver();
             } else if (prop.getProperty("browser").equalsIgnoreCase("edge")) {
-                WebDriverManager.edgedriver().setup();
+                //WebDriverManager.edgedriver().setup();
                 driver = new EdgeDriver();
             } else {
                 System.out.println("No Browser is provided");

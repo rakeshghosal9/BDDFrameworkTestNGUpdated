@@ -2,9 +2,6 @@
 @FEATURE_EXECUTION
 Feature: Forgot Password Page
 
-  Background:
-    Given User is on Home page
-
   @BackFunctionality
   Scenario: Validate the cancel functionality - Feature 2, Scenario - 1
 

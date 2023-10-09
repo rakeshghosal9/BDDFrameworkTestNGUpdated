@@ -1,44 +1,10 @@
 @FEATURE_EXECUTION
 Feature: Login to HRM Application
 
-  Background:
-    Given User is on Home page
-
-  @ValidCredentials1
-  Scenario: Login with valid credentials - Feature 1, Scenario - 1
-
-    When User enters username as "Admin" and password as "admin123"
-
   @ValidCredentials
   Scenario: Login with valid credentials - Feature 1, Scenario - 1
 
     When User enters username as "Admin" and password as "admin123"
-
-  @ValidCredentials
-  Scenario: Login with valid credentials - Feature 1, Scenario - 1
-
-    When User enters username as "Admin" and password as "admin123"
-
-  @ValidCredentials
-  Scenario: Login with valid credentials - Feature 1, Scenario - 1
-
-    When User enters username as "Admin" and password as "admin123"
-
-  @ValidCredentials
-  Scenario: Login with valid credentials - Feature 1, Scenario - 1
-
-    When User enters username as "Admin" and password as "admin123"
-
-  @ValidCredentials
-  Scenario: Login with valid credentials - Feature 1, Scenario - 1
-
-    When User enters username as "Admin" and password as "admin123"
-
-  @ValidCredentials
-  Scenario: Login with valid credentials - Feature 1, Scenario - 1
-
-    When User enters username as "Admin" and password as "admin123"
-
 
     #Then User should be able to login successfully
 
@@ -53,4 +19,3 @@ Feature: Login to HRM Application
       | Admin       | admin12$$  | Invalid credentials               |
       | admin$$     | admin123   | Invalid credentials               |
       | abc123      | xyz$$      | Invalid credentials               |
-      |             | xyz$$      | Invalid credentials               |
