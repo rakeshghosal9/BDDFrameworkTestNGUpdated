@@ -25,7 +25,7 @@ public class BaseTest {
 
         if (driver == null) {
             if (prop.getProperty("browser").equalsIgnoreCase("chrome")) {
-                WebDriverManager.chromedriver().setup();
+                //WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver();
             } else if (prop.getProperty("browser").equalsIgnoreCase("firefox")) {
                 WebDriverManager.firefoxdriver().setup();
@@ -36,7 +36,7 @@ public class BaseTest {
             } else {
                 System.out.println("No Browser is provided");
             }
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(TIMEOUT));
+            //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(TIMEOUT));
             driver.manage().window().maximize();
             driver.get(url);
 

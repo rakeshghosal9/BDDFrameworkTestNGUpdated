@@ -7,11 +7,11 @@ public class ForgotPasswordPage {
 
     WebDriver driver;
 
-     By forgotPasswordPageTitle = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/h6");
-     By cancelBtn = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/div[2]/button[1]");
-     By resetPasswordBtn = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/div[2]/button[2]");
-     By userName = By.name("username");
-     By resetMessage = By.xpath("//*[@id='app']/div[1]/div[1]/div/h6");
+    By forgotPasswordPageTitle = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/h6");
+    By cancelBtn = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/div[2]/button[1]");
+    By resetPasswordBtn = By.xpath("//*[@id='app']/div[1]/div[1]/div/form/div[2]/button[2]");
+    By userName = By.name("username");
+    By resetMessage = By.xpath("//*[@id='app']/div[1]/div[1]/div/h6");
 
     public ForgotPasswordPage(WebDriver driver) {
         this.driver = driver;
@@ -24,7 +24,7 @@ public class ForgotPasswordPage {
 
     // Click Cancel Button
     public void clickOnCancelBtn() {
-         driver.findElement(cancelBtn).click();
+        driver.findElement(cancelBtn).click();
     }
 
     // Click ResetPassword Button

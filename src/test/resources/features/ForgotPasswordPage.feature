@@ -1,3 +1,5 @@
+
+@FEATURE_EXECUTION
 Feature: Forgot Password Page
 
   Background:

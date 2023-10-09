@@ -13,7 +13,7 @@ public class ForgotPasswordPageDefinitions {
     TestSetUp setUp;
     PageObjectManager pageObjectManager;
     public LoginPage loginPage;
-    public  ForgotPasswordPage forgotPasswordPage;
+    public ForgotPasswordPage forgotPasswordPage;
 
     public ForgotPasswordPageDefinitions(TestSetUp setUp) {
         this.setUp = setUp;
@@ -24,7 +24,7 @@ public class ForgotPasswordPageDefinitions {
     @When("User clicks on Forgot your password? link")
     public void forgotPasswordLink() {
 
-      //  LoginPage loginPage = setUp.pageObjectManager.getLoginPage();
+        //  LoginPage loginPage = setUp.pageObjectManager.getLoginPage();
         loginPage.clickOnForgotPasswordLink();
 
     }
@@ -32,17 +32,17 @@ public class ForgotPasswordPageDefinitions {
     @Then("User should be able to navigate to Reset Password page")
     public void verifyForgotPasswordPage() {
 
-      //  ForgotPasswordPage forgotPasswordPage = setUp.pageObjectManager.getForgotPasswordPage();
-        Assert.assertEquals(forgotPasswordPage.getForgotPageText(),"Reset Password");
+        //  ForgotPasswordPage forgotPasswordPage = setUp.pageObjectManager.getForgotPasswordPage();
+        Assert.assertEquals(forgotPasswordPage.getForgotPageText(), "Reset Password");
 
     }
 
     @Then("User clicks on Cancel button to go back to Login Page")
     public void verifyCancelBtn() {
 
-      //  ForgotPasswordPage forgotPasswordPage = setUp.pageObjectManager.getForgotPasswordPage();
+        //  ForgotPasswordPage forgotPasswordPage = setUp.pageObjectManager.getForgotPasswordPage();
         forgotPasswordPage.clickOnCancelBtn();
-        Assert.assertEquals(loginPage.getLoginPageTitle(),"Login");
+        Assert.assertEquals(loginPage.getLoginPageTitle(), "Login");
 
     }
 
@@ -59,7 +59,7 @@ public class ForgotPasswordPageDefinitions {
     public void verifyMessage(String message) {
 
         //  ForgotPasswordPage forgotPasswordPage = setUp.pageObjectManager.getForgotPasswordPage();
-        Assert.assertEquals(forgotPasswordPage.getRestMessage(),message);
+        Assert.assertEquals(forgotPasswordPage.getRestMessage(), message);
 
     }
 }

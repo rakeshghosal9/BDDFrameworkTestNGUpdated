@@ -9,27 +9,19 @@ public class PageObjectManager {
     public ForgotPasswordPage forgotPasswordPage;
     public WebDriver driver;
 
-
-    public PageObjectManager(WebDriver driver)
-    {
+    public PageObjectManager(WebDriver driver) {
         this.driver = driver;
     }
 
-    public LoginPage getLoginPage()
-    {
-
-        loginPage= new LoginPage(driver);
+    public LoginPage getLoginPage() {
+        loginPage = new LoginPage(driver);
         return loginPage;
     }
-
-    public HomePage getHomePage()
-    {
+    public HomePage getHomePage() {
         homePage = new HomePage(driver);
         return homePage;
     }
-
-    public ForgotPasswordPage getForgotPasswordPage()
-    {
+    public ForgotPasswordPage getForgotPasswordPage() {
         forgotPasswordPage = new ForgotPasswordPage(driver);
         return forgotPasswordPage;
     }

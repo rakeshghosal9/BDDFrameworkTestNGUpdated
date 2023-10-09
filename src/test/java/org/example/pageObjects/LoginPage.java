@@ -9,9 +9,9 @@ public class LoginPage {
 
     By userName = By.name("username");
     By passWord = By.name("password");
-    By login = By.xpath("//*[@id='app']/div[1]/div/div[1]/div/div[2]/div[2]/form/div[3]/button");
-    By errorMessage = By.xpath("//*[@id='app']/div[1]/div/div[1]/div/div[2]/div[2]/div/div[1]/div[1]/p");
-    By forgotPasswordLink = By.xpath("//*[@id='app']/div[1]/div/div[1]/div/div[2]/div[2]/form/div[4]/p");
+    By login = By.xpath("//button[@type='submit']");
+    By errorMessage = By.xpath("//div[@class='orangehrm-login-error']");
+    By forgotPasswordLink = By.xpath("//div[@class='orangehrm-login-error']/div/div//p");
     By loginPageTitle = By.xpath("//*[@id='app']/div[1]/div/div[1]/div/div[2]/h5");
 
     public LoginPage(WebDriver driver) {
@@ -22,8 +22,7 @@ public class LoginPage {
         return driver.findElement(errorMessage).getText();
     }
 
-    public void login(String strUserName, String strPassword) {
-
+    public void login(String strUserName, String strPassword) throws InterruptedException {
         // Fill user name
         driver.findElement(userName).sendKeys(strUserName);
 
@@ -34,12 +33,10 @@ public class LoginPage {
         driver.findElement(login).click();
 
     }
-
     // Click on Forgot Password link
     public void clickOnForgotPasswordLink() {
         driver.findElement(forgotPasswordLink).click();
     }
-
     //Get Login Page Title
     public String getLoginPageTitle() {
         return driver.findElement(loginPageTitle).getText();

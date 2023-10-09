@@ -5,7 +5,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pageObjects.HomePage;
 import org.example.pageObjects.LoginPage;
-import org.example.pageObjects.PageObjectManager;
 import org.example.utils.TestSetUp;
 import org.testng.Assert;
 
@@ -14,7 +13,6 @@ import java.io.IOException;
 public class LoginPageDefinitions {
 
     TestSetUp setUp;
-    public PageObjectManager pageObjectManager;
     public LoginPage loginPage;
     public HomePage homePage;
 
@@ -29,11 +27,10 @@ public class LoginPageDefinitions {
     @Given("User is on Home page")
     public void loginTest() throws IOException {
         setUp.baseTest.WebDriverManager().get("https://opensource-demo.orangehrmlive.com/");
-
     }
 
     @When("User enters username as {string} and password as {string}")
-    public void goToHomePage(String userName, String passWord) {
+    public void goToHomePage(String userName, String passWord) throws InterruptedException {
 
       //  LoginPage loginPage = setUp.pageObjectManager.getLoginPage();
 
