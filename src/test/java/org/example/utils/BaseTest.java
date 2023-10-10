@@ -1,6 +1,5 @@
 package org.example.utils;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.example.reusablemethods.ReusableCommonMethods;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -8,19 +7,15 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Assert;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.time.Duration;
 import java.util.Properties;
 
 public class BaseTest {
 
     public WebDriver driver;
-    public final static int TIMEOUT = 10;
 
-    public WebDriver WebDriverManager() throws IOException {
+    public WebDriver WebDriverManager() {
 
-        String DEFAULT_ENVIRONMENT = "INTG1";
+        String DEFAULT_ENVIRONMENT = "ORANGEHRM";
         String URL = null;
         Properties prop;
         //Validate if environment parameter is not passed from maven command line

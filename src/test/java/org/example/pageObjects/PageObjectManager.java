@@ -7,6 +7,7 @@ public class PageObjectManager {
     public LoginPage loginPage;
     public HomePage homePage;
     public ForgotPasswordPage forgotPasswordPage;
+    public TechlisticDemoAutomationPage techlisticDemoAutomationPage;
     public WebDriver driver;
 
     public PageObjectManager(WebDriver driver) {
@@ -25,6 +26,12 @@ public class PageObjectManager {
         forgotPasswordPage = new ForgotPasswordPage(driver);
         return forgotPasswordPage;
     }
+    public TechlisticDemoAutomationPage getTechlisticDemoAutomationPage() {
+        techlisticDemoAutomationPage = new TechlisticDemoAutomationPage(driver);
+        return techlisticDemoAutomationPage;
+    }
+
+
 }
 
 
