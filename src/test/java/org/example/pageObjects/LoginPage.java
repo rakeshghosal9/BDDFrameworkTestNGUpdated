@@ -28,27 +28,39 @@ public class LoginPage {
         PageFactory.initElements(driver, this);
 
     }
+
     public String getErrorMessage() {
-        ReusableCommonMethods.waitForElementToBeVisible(errorMessage,driver,20);
+        ReusableCommonMethods.waitForElementToBeVisible(errorMessage, driver, 20);
         return errorMessage.getText();
     }
 
-    public void login(String strUserName, String strPassword) {
+    public boolean login(String strUserName, String strPassword) {
         // Fill user name
-        ReusableCommonMethods.enterValueInTextBox(userName,strUserName,driver);
+        if (!ReusableCommonMethods.enterValueInTextBox(userName, strUserName, driver)) {
+            System.out.println("User Name field is not displayed after waiting for 60 seconds : ");
+            return false;
+        }
         // Fill password
-        ReusableCommonMethods.enterValueInTextBox(passWord,strPassword,driver);
+        if (!ReusableCommonMethods.enterValueInTextBox(passWord, strPassword, driver)) {
+            System.out.println("Password field is not displayed after waiting for 60 seconds : ");
+            return false;
+        }
         // Click Login button
-        ReusableCommonMethods.clickOnWebElement(driver,login);
-
+        if (!ReusableCommonMethods.clickOnWebElement(driver, login)) {
+            System.out.println("Login button is not clicked");
+            return false;
+        }
+        return true;
     }
+
     // Click on Forgot Password link
     public void clickOnForgotPasswordLink() {
-        ReusableCommonMethods.clickOnWebElement(driver,forgotPasswordLink);
+        ReusableCommonMethods.clickOnWebElement(driver, forgotPasswordLink);
     }
+
     //Get Login Page Title
     public String getLoginPageTitle() {
-        ReusableCommonMethods.waitForElementToBeVisible(loginPageTitle,driver,20);
+        ReusableCommonMethods.waitForElementToBeVisible(loginPageTitle, driver, 20);
         return loginPageTitle.getText();
     }
 }

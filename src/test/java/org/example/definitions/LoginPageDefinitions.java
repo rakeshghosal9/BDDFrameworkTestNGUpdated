@@ -33,7 +33,7 @@ public class LoginPageDefinitions {
     public void goToHomePage(String userName, String passWord) throws InterruptedException {
 
         // login to application
-        loginPage.login(userName, passWord);
+        Assert.assertTrue(loginPage.login(userName, passWord),"Login not successful");
 
     }
 

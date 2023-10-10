@@ -8,9 +8,6 @@ import java.io.IOException;
 
 public class TestSetUp {
 
-
-    public WebElement errorMessage;
-    public WebElement homePageUserName;
     public PageObjectManager pageObjectManager;
     public BaseTest baseTest;
 
