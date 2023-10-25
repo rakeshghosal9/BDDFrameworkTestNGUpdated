@@ -125,7 +125,7 @@ To run with a TestNG Runner class we can use the runner file named **CucumberRun
 
 To run using Maven Command, here is an example for you. Let's explain each one of them in details.
 
-    clean test -Dcucumber.filter=@ValidCredentials -Denv="ORANGEHRM" 
+    clean test -Dcucumber.filter.tags=@ValidCredentials -Denv="ORANGEHRM" 
 
 - clean : It's a Maven Phase with which at the beginning the target folder of the framework will be cleaned.
 - test : It's a validation phase of Maven to build the project. It includes compilation of all the java files and then execute the test.
