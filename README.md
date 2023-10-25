@@ -141,4 +141,5 @@ Below are the reporting options available:
 - Cucumber latest version comes with default report that is hosted on Cloud. After the execution a URL will be generated which can be shared across team members. It's hosted on cloud and can be controlled using cucumber.properties file. We have set a value as **cucumber.publish.enabled=true** inside it. If you don't want to get it published, then simply put this parameter as false. 
 - Maven surefire plugin generates another report inside target/Surefire suite folder, it comes with an emailable report as well. 
 - We are generating extent report as well in our project which is controlled from CucumberRunnerTests.java file inside src/test/java/org/example/runner. 
-- Cucumber.json would also be generated inside target/cucumber-reports/ folder. As this is a JSON file, many third party report generation tool uses it as input to generate report. 
+- Cucumber.json would also be generated inside target/cucumber-reports/ folder. As this is a JSON file, many third party report generation tool uses it as input to generate report.
+- Cucumber HTML report will also be generated in target/cucumber-report-html folder.
