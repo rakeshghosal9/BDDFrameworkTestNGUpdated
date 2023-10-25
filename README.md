@@ -142,9 +142,3 @@ Below are the reporting options available:
 - Maven surefire plugin generates another report inside target/Surefire suite folder, it comes with an emailable report as well. 
 - We are generating extent report as well in our project which is controlled from CucumberRunnerTests.java file inside src/test/java/org/example/runner. 
 - Cucumber.json would also be generated inside target/cucumber-reports/ folder. As this is a JSON file, many third party report generation tool uses it as input to generate report. 
-
-
-## About Me
-
-My Name is Rakesh Ghosal. I'm a Test Automation Architect with total 10.5 years of experience. During my career I have built many test automation framework such as BDDFramework, Keyword Driven Framework, Data Driven Framework. I'm passionate about technologies and love to learn  new skill whenever get time. 
-
