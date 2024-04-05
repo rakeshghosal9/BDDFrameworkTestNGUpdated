@@ -8,6 +8,7 @@ public class PageObjectManager {
     public HomePage homePage;
     public ForgotPasswordPage forgotPasswordPage;
     public TechlisticDemoAutomationPage techlisticDemoAutomationPage;
+    public StockAnalysisPage stockAnalysisPage;
     public WebDriver driver;
 
     public PageObjectManager(WebDriver driver) {
@@ -29,6 +30,11 @@ public class PageObjectManager {
     public TechlisticDemoAutomationPage getTechlisticDemoAutomationPage() {
         techlisticDemoAutomationPage = new TechlisticDemoAutomationPage(driver);
         return techlisticDemoAutomationPage;
+    }
+
+    public StockAnalysisPage getStockAnalysisPage() {
+        stockAnalysisPage = new StockAnalysisPage(driver);
+        return stockAnalysisPage;
     }
 
 
