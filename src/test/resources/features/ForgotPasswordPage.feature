@@ -2,6 +2,9 @@
 @FEATURE_EXECUTION
 Feature: Forgot Password Page
 
+  Background: Condition to check before each scenario
+    Given the url is launched successfully
+
   @BackFunctionality
   Scenario: Validate the cancel functionality - Feature 2, Scenario - 1
 

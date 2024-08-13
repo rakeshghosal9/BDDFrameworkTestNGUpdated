@@ -1,0 +1,197 @@
+package org.example.utils;
+
+import com.mongodb.util.JSON;
+import io.cucumber.java.sl.In;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+public class GenerateHTMLReport {
+
+    public static void main(String args[]) throws IOException, ParseException {
+        JSONParser parser = new JSONParser();
+        Object object = parser.parse(new FileReader(System.getProperty("user.dir") + "\\target\\cucumber-reports\\Cucumber.json"));
+        JSONArray rootArray = (JSONArray) object;
+        HashMap<String, HashMap<String, Integer>> summaryMap = new HashMap<>();
+        //System.out.println(rootArray.toString());
+        for (int featureID = 0; featureID < rootArray.size(); featureID++) {
+            JSONObject featureObject = (JSONObject) rootArray.get(featureID);
+            String featureName = featureObject.get("name").toString();
+            JSONArray elementObject = (JSONArray) featureObject.get("elements");
+            for (int scenarioID = 0; scenarioID < elementObject.size(); ) {
+                boolean backgroundValidationStatus = true;
+                boolean scenarioStatus = true;
+                boolean finalValidationStatus = true;
+                JSONObject scenarioObject = (JSONObject) elementObject.get(scenarioID);
+                String type = scenarioObject.get("type").toString();
+                if (type != null && type.equalsIgnoreCase("background")) {
+                    backgroundValidationStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"));
+                    scenarioObject = (JSONObject) elementObject.get((scenarioID + 1));
+                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"));
+                    scenarioID = scenarioID + 2;
+                } else {
+                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"));
+                    scenarioID = scenarioID + 1;
+                }
+                finalValidationStatus = backgroundValidationStatus && scenarioStatus;
+                //check if feature name already exists in the map
+                if (summaryMap.get(featureName) != null) {
+                    int passCount = summaryMap.get(featureName).get("pass");
+                    int failCount = summaryMap.get(featureName).get("fail");
+                    if (finalValidationStatus) {
+                        passCount = passCount + 1;
+                    } else {
+                        failCount = failCount + 1;
+                    }
+                    HashMap<String, Integer> temp = new HashMap<>();
+                    temp.put("pass", passCount);
+                    temp.put("fail", failCount);
+                    summaryMap.put(featureName, temp);
+                } else {
+                    HashMap<String, Integer> temp = new HashMap<>();
+                    if (finalValidationStatus) {
+                        temp.put("pass", 1);
+                        temp.put("fail", 0);
+                    } else {
+                        temp.put("pass", 0);
+                        temp.put("fail", 1);
+                    }
+                    summaryMap.put(featureName, temp);
+                }
+            }
+        }
+        List<HashMap<String, String>> consolidatedDataFroReport = getReportData(summaryMap);
+        generateHTMLReport(consolidatedDataFroReport);
+    }
+
+
+    public static boolean getScenarioStatus(JSONArray stepArray) {
+        try {
+            for (int i = 0; i < stepArray.size(); i++) {
+                JSONObject stepObject = (JSONObject) stepArray.get(i);
+                JSONObject resultObject = (JSONObject) stepObject.get("result");
+                if (!(resultObject.get("status").toString().equalsIgnoreCase("passed"))) {
+                    return false;
+                }
+            }
+            return true;
+
+        } catch (Exception e) {
+            System.out.println("Exception Occurred while getting scenario status : " + e);
+            return false;
+        }
+    }
+
+    public static List<HashMap<String, String>> getReportData(HashMap<String, HashMap<String, Integer>> summaryMap) {
+        try {
+            List<HashMap<String, String>> consolidatedDataFroReport = new ArrayList<>();
+            int totalScenarioLastRow = 0;
+            int totalPassLastRow = 0;
+            int totalFailLastRow = 0;
+
+            for (String featureName : summaryMap.keySet()) {
+                HashMap<String, String> tempValue = new HashMap<>();
+                int pasCount = summaryMap.get(featureName).get("pass");
+                int failCount = summaryMap.get(featureName).get("fail");
+                int totalScenario = pasCount + failCount;
+                double passPercentage = ((double) pasCount / (double) totalScenario) * 100;
+                double failPercentage = ((double) failCount / (double) totalScenario) * 100;
+                tempValue.put("feature_name", featureName);
+                tempValue.put("total_scenario", "" + totalScenario);
+                tempValue.put("pass", "" + pasCount);
+                tempValue.put("fail", "" + failCount);
+                tempValue.put("pass_percentage", "" + passPercentage);
+                tempValue.put("fail_percentage", "" + failPercentage);
+                consolidatedDataFroReport.add(tempValue);
+                totalScenarioLastRow = totalScenarioLastRow + totalScenario;
+                totalPassLastRow = totalPassLastRow + pasCount;
+                totalFailLastRow = totalFailLastRow + failCount;
+            }
+
+            double passPercentageLastRow = ((double) totalPassLastRow / (double) totalScenarioLastRow) * 100;
+            double failPercentageLastRow = ((double) totalFailLastRow / (double) totalScenarioLastRow) * 100;
+            HashMap<String, String> tempValue = new HashMap<>();
+            tempValue.put("feature_name", "Total");
+            tempValue.put("total_scenario", "" + totalScenarioLastRow);
+            tempValue.put("pass", "" + totalPassLastRow);
+            tempValue.put("fail", "" + totalFailLastRow);
+            tempValue.put("pass_percentage", "" + passPercentageLastRow);
+            tempValue.put("fail_percentage", "" + failPercentageLastRow);
+            consolidatedDataFroReport.add(tempValue);
+            return consolidatedDataFroReport;
+
+        } catch (Exception e) {
+            System.out.println("Exception Occurred while getting the summary report : " + e);
+            return null;
+        }
+
+    }
+
+    public static void generateHTMLReport(List<HashMap<String, String>> consolidatedDataFroReport) {
+        try {
+            String htmlReportString = "<html>\n" +
+                    "<head>\n" +
+                    "\t<style>\n" +
+                    "\ttable,\n" +
+                    "\tth,\n" +
+                    "\ttd {\n" +
+                    "\t\tborder: 1px solid black;\n" +
+                    "\t\tborder-collapse: collapse;\n" +
+                    "\t}\n" +
+                    "\n" +
+                    "\tth {\n" +
+                    "\t\ttext-align: center;\n" +
+                    "\t}\n" +
+                    "\t</style>\n" +
+                    "</head>\n" +
+                    "<body>\n" +
+                    "\t<table style=\"width:100%\">\n" +
+                    "\t <caption style=\"background-color:#000000;color:white\">Demo to generate HTML Report</caption>\n" +
+                    "\t\t<caption style=\"background-color:#4287f5;color:white\">Test Automation Summary Report</caption>\n" +
+                    "\t\t<tr>\n" +
+                    "\t\t\t<th>Feature Name</th>\n" +
+                    "\t\t\t<th>Total Scenario</th>\n" +
+                    "\t\t\t<th>Pass</th>\n" +
+                    "\t\t\t<th>Fail</th>\n" +
+                    "\t\t\t<th>Pass Percentage</th>\n" +
+                    "\t\t\t<th>Fail Percentage</th>\t\n" +
+                    "\t\t</tr>";
+
+            for (int i = 0; i < consolidatedDataFroReport.size(); i++) {
+                htmlReportString = htmlReportString + "<tr>\n" +
+                        "\t\t    <td>" + consolidatedDataFroReport.get(i).get("feature_name") + "</td>\n" +
+                        "\t\t\t<td>" + consolidatedDataFroReport.get(i).get("total_scenario") + "</td>\n" +
+                        "\t\t\t<td>" + consolidatedDataFroReport.get(i).get("pass") + "</td>\n" +
+                        "\t\t\t<td>" + consolidatedDataFroReport.get(i).get("fail") + "</td>\n" +
+                        "\t\t\t<td>" + consolidatedDataFroReport.get(i).get("pass_percentage") + "</td>\n" +
+                        "\t\t\t<td>" + consolidatedDataFroReport.get(i).get("fail_percentage") + "</td>\n" +
+                        "\t\t</tr>";
+            }
+
+            htmlReportString = htmlReportString + "\t</table>\n" +
+                    "</body>\n" +
+                    "</html>";
+
+            //Generate Report
+            try {
+                Writer fileWriter = new FileWriter(new File(System.getProperty("user.dir") + "/target/htmlReport.html"));
+                fileWriter.write(htmlReportString);
+                fileWriter.close();
+                System.out.println("Report Generated Successfully");
+
+            } catch (Exception e) {
+                System.out.println("Exception Occurred while generating the report : " + e);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Exception Occurred while generating the report string : " + e);
+        }
+    }
+
+}

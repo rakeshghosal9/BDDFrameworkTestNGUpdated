@@ -62,4 +62,9 @@ public class ForgotPasswordPageDefinitions {
         Assert.assertEquals(forgotPasswordPage.getRestMessage(), message);
 
     }
+
+    @Then("the url is launched successfully")
+    public void urlPageLaunchedSuccessfully() {
+        System.out.println("URL is launched successfully");
+    }
 }

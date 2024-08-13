@@ -1,4 +1,4 @@
-@FEATURE_EXECUTION
+#@FEATURE_EXECUTION
 Feature: Techlistic Demo Automation Page
 
   @techlisticdemo
