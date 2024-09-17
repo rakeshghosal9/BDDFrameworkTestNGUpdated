@@ -1,18 +1,25 @@
 package org.example.utils;
 
-import com.mongodb.util.JSON;
-import io.cucumber.java.sl.In;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class GenerateHTMLReport {
+
+    public static List<HashMap<String,String>> failedScenarioDetails = new ArrayList<>();
+    public static boolean failureFlag = false;
 
     public static void main(String args[]) throws IOException, ParseException {
         JSONParser parser = new JSONParser();
@@ -30,13 +37,14 @@ public class GenerateHTMLReport {
                 boolean finalValidationStatus = true;
                 JSONObject scenarioObject = (JSONObject) elementObject.get(scenarioID);
                 String type = scenarioObject.get("type").toString();
+                String scenarioName = scenarioObject.get("name").toString();
                 if (type != null && type.equalsIgnoreCase("background")) {
-                    backgroundValidationStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"));
+                    backgroundValidationStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"),featureName,scenarioName);
                     scenarioObject = (JSONObject) elementObject.get((scenarioID + 1));
-                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"));
+                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"),featureName,scenarioName);
                     scenarioID = scenarioID + 2;
                 } else {
-                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"));
+                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"),featureName,scenarioName);
                     scenarioID = scenarioID + 1;
                 }
                 finalValidationStatus = backgroundValidationStatus && scenarioStatus;
@@ -68,15 +76,39 @@ public class GenerateHTMLReport {
         }
         List<HashMap<String, String>> consolidatedDataFroReport = getReportData(summaryMap);
         generateHTMLReport(consolidatedDataFroReport);
+        // Get current date and time
+        LocalDateTime now = LocalDateTime.now();
+        // Define the format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // Format the current date and time
+        String executionDateTime = now.format(formatter);
+        int totalScenario = Integer.parseInt(consolidatedDataFroReport.get
+                (consolidatedDataFroReport.size()-1).get("total_scenario"));
+        int totalPass = Integer.parseInt(consolidatedDataFroReport.get
+                (consolidatedDataFroReport.size()-1).get("pass"));
+        int totalFail = Integer.parseInt(consolidatedDataFroReport.get
+                (consolidatedDataFroReport.size()-1).get("fail"));
+        float passPercentage = Float.parseFloat(consolidatedDataFroReport.get
+                (consolidatedDataFroReport.size()-1).get("pass_percentage"));
+        float failPercentage = Float.parseFloat(consolidatedDataFroReport.get
+                (consolidatedDataFroReport.size()-1).get("fail_percentage"));
+        insertExecutionSummary(executionDateTime,totalScenario,totalPass,totalFail,passPercentage,failPercentage);
+        //System.out.println(failedScenarioDetails);
     }
 
 
-    public static boolean getScenarioStatus(JSONArray stepArray) {
+    public static boolean getScenarioStatus(JSONArray stepArray,String featureName,String scenarioName) {
         try {
             for (int i = 0; i < stepArray.size(); i++) {
                 JSONObject stepObject = (JSONObject) stepArray.get(i);
                 JSONObject resultObject = (JSONObject) stepObject.get("result");
                 if (!(resultObject.get("status").toString().equalsIgnoreCase("passed"))) {
+                    HashMap<String,String> temp = new HashMap<>();
+                    temp.put("Feature_Name",featureName);
+                    temp.put("Scenario_Name",scenarioName);
+                    temp.put("Error_Message",getErrorMessage(resultObject.get("error_message").toString()));
+                    failedScenarioDetails.add(temp);
+                    failureFlag = true;
                     return false;
                 }
             }
@@ -106,8 +138,8 @@ public class GenerateHTMLReport {
                 tempValue.put("total_scenario", "" + totalScenario);
                 tempValue.put("pass", "" + pasCount);
                 tempValue.put("fail", "" + failCount);
-                tempValue.put("pass_percentage", "" + passPercentage);
-                tempValue.put("fail_percentage", "" + failPercentage);
+                tempValue.put("pass_percentage", String.format("%.2f", passPercentage));
+                tempValue.put("fail_percentage", String.format("%.2f", failPercentage));
                 consolidatedDataFroReport.add(tempValue);
                 totalScenarioLastRow = totalScenarioLastRow + totalScenario;
                 totalPassLastRow = totalPassLastRow + pasCount;
@@ -121,8 +153,8 @@ public class GenerateHTMLReport {
             tempValue.put("total_scenario", "" + totalScenarioLastRow);
             tempValue.put("pass", "" + totalPassLastRow);
             tempValue.put("fail", "" + totalFailLastRow);
-            tempValue.put("pass_percentage", "" + passPercentageLastRow);
-            tempValue.put("fail_percentage", "" + failPercentageLastRow);
+            tempValue.put("pass_percentage", String.format("%.2f", passPercentageLastRow));
+            tempValue.put("fail_percentage", String.format("%.2f", failPercentageLastRow));
             consolidatedDataFroReport.add(tempValue);
             return consolidatedDataFroReport;
 
@@ -173,8 +205,30 @@ public class GenerateHTMLReport {
                         "\t\t\t<td>" + consolidatedDataFroReport.get(i).get("fail_percentage") + "</td>\n" +
                         "\t\t</tr>";
             }
+            htmlReportString = htmlReportString + "\t</table>";
 
-            htmlReportString = htmlReportString + "\t</table>\n" +
+            if(failureFlag == true)
+            {
+                htmlReportString = htmlReportString + "<br></br>\n" +
+                        "\t<table style=\"width:100%\">\n" +
+                        "\t<caption style=\"background-color:#4287f5;color:white\">Failed Scenario Details</caption>\n" +
+                        "\t<tr>\n" +
+                        "\t\t\t<th>Feature Name</th>\n" +
+                        "\t\t\t<th>Scenario Name</th>\n" +
+                        "\t\t\t<th>Failure Reason</th>\t\n" +
+                        "\t</tr>";
+                for(HashMap<String,String> failedScenario : failedScenarioDetails)
+                {
+                    htmlReportString = htmlReportString + "<tr>\n" +
+                            "\t\t    <td>"+failedScenario.get("Feature_Name")+"</td>\n" +
+                            "\t\t\t<td>"+failedScenario.get("Scenario_Name")+"</td>\n" +
+                            "\t\t\t<td>"+failedScenario.get("Error_Message")+"</td>\n" +
+                            "\t</tr>";
+                }
+                htmlReportString = htmlReportString + "</table>\n";
+            }
+
+            htmlReportString = htmlReportString +
                     "</body>\n" +
                     "</html>";
 
@@ -194,4 +248,45 @@ public class GenerateHTMLReport {
         }
     }
 
+    public static String getErrorMessage(String errorMessage) {
+        try {
+            int startIndex = errorMessage.indexOf(":");
+            int endIndex = errorMessage.indexOf("at");
+            String errorMessageCalculated = errorMessage.substring((startIndex+1), endIndex);
+            return errorMessageCalculated;
+        } catch (Exception e) {
+            return "Error Message not found";
+        }
+    }
+
+    public static void insertExecutionSummary(String executionTime,int totalScenario, int totalPass,
+                                              int totalFail, double passPercentage,double failPercentage) {
+        // Database connection parameters
+        String jdbcURL = "jdbc:mysql://localhost:3306/automationstat";
+        String username = "root";
+        String password = "Mysql@2024";
+
+        // SQL INSERT statement
+        String sql = "INSERT INTO automationstat.execution_summary " +
+                "(Execution_Time, Total_Scenarios, Total_Pass, Total_Fail, Pass_Percentage, Fail_Percentage ) " +
+                "VALUES ('" + executionTime + "', " + totalScenario + ", " + totalPass + ", " + totalFail + ", " + passPercentage + ", " + failPercentage + ")";
+        try {
+            // Establish connection to the database
+            Connection connection = DriverManager.getConnection(jdbcURL, username, password);
+
+            // Create a PreparedStatement for executing SQL queries
+            PreparedStatement statement = connection.prepareStatement(sql);
+            // Execute the SQL statement (INSERT)
+            int rowsInserted = statement.executeUpdate();
+            if (rowsInserted > 0) {
+                System.out.println("Execution Summary inserted successfully!");
+            }
+            // Close the statement and the connection
+            statement.close();
+            connection.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
