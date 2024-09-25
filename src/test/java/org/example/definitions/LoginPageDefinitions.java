@@ -1,6 +1,5 @@
 package org.example.definitions;
 
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pageObjects.HomePage;
@@ -34,6 +33,7 @@ public class LoginPageDefinitions {
 
         // login to application
         Assert.assertTrue(loginPage.login(userName, passWord),"Login not successful");
+        //Assert.assertTrue(false,"Login not successful");
 
     }
 
@@ -47,7 +47,8 @@ public class LoginPageDefinitions {
     public void verifyErrorMessage(String expectedErrorMessage) {
 
         // Verify home page
-        Assert.assertEquals(loginPage.getErrorMessage(),expectedErrorMessage);
+        //Assert.assertEquals(loginPage.getErrorMessage(),expectedErrorMessage);
+        Assert.fail("Intentionally failed test case");
 
     }
 

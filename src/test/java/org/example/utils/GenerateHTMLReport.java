@@ -15,11 +15,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GenerateHTMLReport {
 
     public static List<HashMap<String,String>> failedScenarioDetails = new ArrayList<>();
+    public static HashMap<String,HashMap<String,Integer>> tagWiseCountDetails = new HashMap();
     public static boolean failureFlag = false;
+    public static long duration = 0;
+
+    public static HashMap<String,Long> scenarioWiseDuration = new HashMap<>();
 
     public static void main(String args[]) throws IOException, ParseException {
         JSONParser parser = new JSONParser();
@@ -39,15 +44,22 @@ public class GenerateHTMLReport {
                 String type = scenarioObject.get("type").toString();
                 String scenarioName = scenarioObject.get("name").toString();
                 if (type != null && type.equalsIgnoreCase("background")) {
-                    backgroundValidationStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"),featureName,scenarioName);
+                    backgroundValidationStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"), featureName, scenarioName);
                     scenarioObject = (JSONObject) elementObject.get((scenarioID + 1));
-                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"),featureName,scenarioName);
+                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"), featureName, scenarioName);
                     scenarioID = scenarioID + 2;
                 } else {
-                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"),featureName,scenarioName);
+                    scenarioStatus = getScenarioStatus((JSONArray) scenarioObject.get("steps"), featureName, scenarioName);
                     scenarioID = scenarioID + 1;
                 }
                 finalValidationStatus = backgroundValidationStatus && scenarioStatus;
+                //Add code to store the tag wise count
+                if (scenarioObject.get("tags") != null) {
+                    storeTagWiseCount((JSONArray) scenarioObject.get("tags"), finalValidationStatus);
+                }
+                //Add duration of each scenario
+                scenarioWiseDuration.put(scenarioName,duration);
+
                 //check if feature name already exists in the map
                 if (summaryMap.get(featureName) != null) {
                     int passCount = summaryMap.get(featureName).get("pass");
@@ -75,7 +87,12 @@ public class GenerateHTMLReport {
             }
         }
         List<HashMap<String, String>> consolidatedDataFroReport = getReportData(summaryMap);
-        generateHTMLReport(consolidatedDataFroReport);
+        //System.out.println("Duration Details : "+scenarioWiseDuration);
+        // Sort the scenarios by duration
+        List<Map.Entry<String, Long>> sortedEntries = new ArrayList<>(scenarioWiseDuration.entrySet());
+        sortedEntries.sort(Map.Entry.<String, Long>comparingByValue().reversed());
+
+        generateHTMLReport(consolidatedDataFroReport,sortedEntries);
         // Get current date and time
         LocalDateTime now = LocalDateTime.now();
         // Define the format
@@ -83,25 +100,27 @@ public class GenerateHTMLReport {
         // Format the current date and time
         String executionDateTime = now.format(formatter);
         int totalScenario = Integer.parseInt(consolidatedDataFroReport.get
-                (consolidatedDataFroReport.size()-1).get("total_scenario"));
+                (consolidatedDataFroReport.size() - 1).get("total_scenario"));
         int totalPass = Integer.parseInt(consolidatedDataFroReport.get
-                (consolidatedDataFroReport.size()-1).get("pass"));
+                (consolidatedDataFroReport.size() - 1).get("pass"));
         int totalFail = Integer.parseInt(consolidatedDataFroReport.get
-                (consolidatedDataFroReport.size()-1).get("fail"));
+                (consolidatedDataFroReport.size() - 1).get("fail"));
         float passPercentage = Float.parseFloat(consolidatedDataFroReport.get
-                (consolidatedDataFroReport.size()-1).get("pass_percentage"));
+                (consolidatedDataFroReport.size() - 1).get("pass_percentage"));
         float failPercentage = Float.parseFloat(consolidatedDataFroReport.get
-                (consolidatedDataFroReport.size()-1).get("fail_percentage"));
-        insertExecutionSummary(executionDateTime,totalScenario,totalPass,totalFail,passPercentage,failPercentage);
+                (consolidatedDataFroReport.size() - 1).get("fail_percentage"));
+        //insertExecutionSummary(executionDateTime, totalScenario, totalPass, totalFail, passPercentage, failPercentage);
         //System.out.println(failedScenarioDetails);
     }
 
 
     public static boolean getScenarioStatus(JSONArray stepArray,String featureName,String scenarioName) {
         try {
+            duration = 0;
             for (int i = 0; i < stepArray.size(); i++) {
                 JSONObject stepObject = (JSONObject) stepArray.get(i);
                 JSONObject resultObject = (JSONObject) stepObject.get("result");
+                duration = duration + Long.parseLong(resultObject.get("duration").toString());
                 if (!(resultObject.get("status").toString().equalsIgnoreCase("passed"))) {
                     HashMap<String,String> temp = new HashMap<>();
                     temp.put("Feature_Name",featureName);
@@ -109,6 +128,7 @@ public class GenerateHTMLReport {
                     temp.put("Error_Message",getErrorMessage(resultObject.get("error_message").toString()));
                     failedScenarioDetails.add(temp);
                     failureFlag = true;
+                    //Add code to store the tag result
                     return false;
                 }
             }
@@ -165,7 +185,8 @@ public class GenerateHTMLReport {
 
     }
 
-    public static void generateHTMLReport(List<HashMap<String, String>> consolidatedDataFroReport) {
+    public static void generateHTMLReport(List<HashMap<String, String>> consolidatedDataFroReport,
+                                          List<Map.Entry<String, Long>> sortedEntries) {
         try {
             String htmlReportString = "<html>\n" +
                     "<head>\n" +
@@ -183,7 +204,7 @@ public class GenerateHTMLReport {
                     "\t</style>\n" +
                     "</head>\n" +
                     "<body>\n" +
-                    "\t<table style=\"width:100%\">\n" +
+                    "\t<table style=\"width:75%\">\n" +
                     "\t <caption style=\"background-color:#000000;color:white\">Demo to generate HTML Report</caption>\n" +
                     "\t\t<caption style=\"background-color:#4287f5;color:white\">Test Automation Summary Report</caption>\n" +
                     "\t\t<tr>\n" +
@@ -207,10 +228,40 @@ public class GenerateHTMLReport {
             }
             htmlReportString = htmlReportString + "\t</table>";
 
+            //Adding code to display tag wise execution summary
+            htmlReportString = htmlReportString + "<br></br>\n" +
+                    "<table style=\"width:75%\">\n" +
+                    "    <caption style=\"background-color:#4287f5;color:white\">Tag Wise Execution Details</caption>\n" +
+                    "    <tr>\n" +
+                    "        <th>Tag Name</th>\n" +
+                    "        <th>Total Scenario</th>\n" +
+                    "        <th>Pass</th>\n" +
+                    "\t\t<th>Fail</th>\n" +
+                    "\t\t<th>Pass Percentage</th>\n" +
+                    "\t\t<th>Fail Percentage</th>\n" +
+                    "    </tr>";
+            for(String tagName:tagWiseCountDetails.keySet())
+            {
+                int pass = tagWiseCountDetails.get(tagName).get("pass");
+                int fail = tagWiseCountDetails.get(tagName).get("fail");
+                double passPercentage = ((double) pass / (double) (pass+fail)) * 100;
+                double failPercentage = ((double) fail / (double) (pass+fail)) * 100;
+                htmlReportString = htmlReportString + "</tr>\n" +
+                        "\t<tr>\n" +
+                        "\t<td>"+tagName.toUpperCase()+"</td>\n" +
+                        "\t<td>"+(pass+fail)+"</td>\n" +
+                        "\t<td>"+pass+"</td>\n" +
+                        "\t<td>"+fail+"</td>\n" +
+                        "\t<td>"+String.format("%.2f", passPercentage)+"</td>\n" +
+                        "\t<td>"+String.format("%.2f", failPercentage)+"</td>\n" +
+                        "\t</tr>";
+            }
+            htmlReportString = htmlReportString + "</table>";
+
             if(failureFlag == true)
             {
                 htmlReportString = htmlReportString + "<br></br>\n" +
-                        "\t<table style=\"width:100%\">\n" +
+                        "\t<table style=\"width:75%\">\n" +
                         "\t<caption style=\"background-color:#4287f5;color:white\">Failed Scenario Details</caption>\n" +
                         "\t<tr>\n" +
                         "\t\t\t<th>Feature Name</th>\n" +
@@ -228,6 +279,21 @@ public class GenerateHTMLReport {
                 htmlReportString = htmlReportString + "</table>\n";
             }
 
+            //Add code to generate scenarios by duration
+            htmlReportString = htmlReportString + "<br></br>\n" +
+                    "\t<table style=\"width:50%\">\n" +
+                    "\t<caption style=\"background-color:#4287f5;color:white\">Most Time Taken Scenarios</caption>\n" +
+                    "\t<tr>\n" +
+                    "\t\t\t<th>Scenario Name</th>\n" +
+                    "\t\t\t<th>Duration (In Seconds)</th>\t\n" +
+                    "\t</tr>";
+            for(int i=0;i<sortedEntries.size();i++)
+            {
+                htmlReportString = htmlReportString + "<tr>\n" +
+                        "\t\t\t<td>"+sortedEntries.get(i).getKey()+"</td>\n" +
+                        "\t\t\t<td>"+getDurationInSeconds(sortedEntries.get(i).getValue())+"</td>\t\n" +
+                        "\t</tr>";
+            }
             htmlReportString = htmlReportString +
                     "</body>\n" +
                     "</html>";
@@ -287,6 +353,49 @@ public class GenerateHTMLReport {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void storeTagWiseCount(JSONArray tagArray, boolean status) {
+        for (int i = 0; i < tagArray.size(); i++) {
+            JSONObject eachTagObject = (JSONObject) tagArray.get(i);
+            String tagName = eachTagObject.get("name").toString();
+            int passCount = 0;
+            int failCount = 0;
+            if (tagWiseCountDetails.get(tagName) != null) {
+                passCount = tagWiseCountDetails.get(tagName).get("pass");
+                failCount = tagWiseCountDetails.get(tagName).get("fail");
+                if (status == true) {
+                    passCount = passCount + 1;
+                } else {
+                    failCount = failCount + 1;
+                }
+            } else {
+                if (status == true) {
+                    passCount = 1;
+                } else {
+                    failCount = 1;
+                }
+            }
+            HashMap<String, Integer> temp = new HashMap<>();
+            temp.put("pass", passCount);
+            temp.put("fail", failCount);
+            tagWiseCountDetails.put(tagName, temp);
+        }
+    }
+
+    public static String getDurationInSeconds(long durationValue)
+    {
+        try
+        {
+            double result = durationValue / 1_000_000_000.0;
+            // Round down to two decimal places
+            double roundedResult = Math.floor(result * 100) / 100;
+            // Format to two decimal places
+            return String.format("%.2f", roundedResult);
+        }catch (Exception e)
+        {
+            return ""+durationValue;
         }
     }
 }
